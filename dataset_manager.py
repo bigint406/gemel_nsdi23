@@ -162,7 +162,7 @@ class ObjectDetectionDataset():
     
 
 class ImageClassificationDataset(datasets.ImageFolder):
-     """Creates dataset for image classification
+    """Creates dataset for image classification
     
     """
     def __init__(self, model_name, model_info, training_phase):
