@@ -1,9 +1,17 @@
-from models.model_architectures import resnet50
+from models.model_architectures import *
 import torch
 from torchvision import models, transforms, datasets
 from torch.utils.data import DataLoader
-from sklearn.model_selection import train_test_split
 import matplotlib.pyplot as plt
+import os
+
+taskname = "main_2nd_cat_fish"
+if not os.path.exists(f'test/models/{taskname}'):
+    os.makedirs(f'test/models/{taskname}')
+if not os.path.exists(f'test/img'):
+    os.makedirs(f'test/img')
+if not os.path.exists(f'test/logs'):
+    os.makedirs(f'test/logs')
 
 # 设置随机种子
 seed = 42
@@ -20,34 +28,35 @@ transform = transforms.Compose([
 ])
 
 # 加载数据集
-original_dataset = datasets.ImageFolder('/mnt/data/zs/samba/gemel_nsdi23/dataset_formation/datasets/main_2nd_cat_fish_CL/val/', transform=transform)
-# 切分数据集为训练集和验证集
-train_size = 0.8
-train_indices, val_indices = train_test_split(list(range(len(original_dataset))), train_size=train_size, random_state=seed)
-
-train_dataset = torch.utils.data.Subset(original_dataset, train_indices)
-val_dataset = torch.utils.data.Subset(original_dataset, val_indices)
+train_dataset = datasets.ImageFolder(f'/mnt/data/zs/samba/gemel_nsdi23/dataset_formation/datasets/{taskname}_CL/train/', transform=transform)
+val_dataset = datasets.ImageFolder(f'/mnt/data/zs/samba/gemel_nsdi23/dataset_formation/datasets/{taskname}_CL/val/', transform=transform)
 
 # 定义 DataLoader
-batch_size = 64
-train_loader = DataLoader(train_dataset, batch_size=batch_size, shuffle=True)
+batch_size = 1024
+train_loader = DataLoader(train_dataset, batch_size=batch_size, shuffle=False)
 val_loader = DataLoader(val_dataset, batch_size=batch_size, shuffle=False)
 
 # 加载预训练的ResNet-50模型
+torch.cuda.set_device(1)
 model = resnet50(2)
+# model.load_state_dict(torch.load("/mnt/data/zs/samba/gemel_nsdi23/test/models/main_2nd_cat_fish/resnet50_model_epoch_9.pth"))
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+for param in model.parameters():
+    param.requires_grad = False
+for param in model.fc.parameters():
+    param.requires_grad = True
 model.to(device)
 
 # 定义损失函数和优化器
 criterion = torch.nn.CrossEntropyLoss()
-optimizer = torch.optim.Adam(model.parameters(), lr=0.001)
+optimizer = torch.optim.Adam(filter(lambda p: p.requires_grad, model.parameters()), lr=0.02)
 
 losses = []
 accuracies = []
 
 # 训练模型
 num_epochs = 100
-for epoch in range(num_epochs):
+for epoch in range(0, num_epochs):
     model.train()
     epoch_loss = 0.0
     for images, labels in train_loader:
@@ -74,15 +83,14 @@ for epoch in range(num_epochs):
 
         accuracy = correct / total
         accuracies.append(accuracy)
-        # print(f'Epoch {epoch+1}/{num_epochs}, Validation Accuracy: {100 * accuracy:.2f}%')
+        print(f'Epoch {epoch+1}/{num_epochs}, Validation Accuracy: {100 * accuracy:.2f}%')
 
     avg_epoch_loss = epoch_loss / len(train_loader)
     losses.append(avg_epoch_loss)
 
     if (epoch+1) % 10 == 0:
-        torch.save(model.state_dict(), f'test/models/resnet50_model_epoch_{epoch}.pth')
+        torch.save(model.state_dict(), f'test/models/{taskname}/resnet50_model_epoch_{epoch}.pth')
 
-# 绘制损失和准确率曲线
 # 绘制损失和准确率曲线
 fig, ax1 = plt.subplots(figsize=(12, 6))
 
@@ -100,9 +108,9 @@ ax2.tick_params(axis='y', labelcolor=color)
 
 fig.tight_layout()
 plt.title('Training Loss and Validation Accuracy')
-plt.savefig('test/img/training_plot.png')
+plt.savefig(f'test/img/{taskname}.png')
 
-with open("test/logs/retrain.log", 'w') as f:
+with open(f"test/logs/{taskname}.log", 'w') as f:
     f.write(str(losses))
     f.write("\n")
     f.write(str(accuracies))
