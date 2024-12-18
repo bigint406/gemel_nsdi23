@@ -14,8 +14,8 @@ from torchvision.models.detection.rpn import AnchorGenerator
 from collections import OrderedDict
 from itertools import combinations
 
-from transforms import FRCNN_TRANSFORM, YOLOv3_TRAIN_TRANSFORM, YOLOv3_VAL_TRANSFORM, classification_transforms
-from eval_methods import frcnn_eval, yolo_eval, classification_eval
+from transforms import classification_transforms
+from eval_methods import frcnn_eval, classification_eval
 from models.model_architectures import resnet50_backbone, resnet101_backbone, frcnn_model, resnet50, resnet101, vgg16, resnet152, resnet18, mobilenetv3, inceptionv3, ssd_vgg_model, ssd_mobilenet_model, yolov3, tiny_yolov3
 
 # Expects a dict containing each model to be merged and some info about it (see README and example below)
@@ -36,33 +36,34 @@ def merge_workload(model_dict):
 # One classifies cars vs. people at Main & 2nd with ResNet50
 # One classifies cars, trucks, and motorcycles at 1st & Elm with ResNet101
 def create_sample_model_dict():
+	tasknames = ['main_2nd_cat_fish_resnet50', 'elm_1st_car_truck_train_resnet101']
 	model_dict = {}
 	
 	# Task 1
-	model_dict['main_2nd_cars_people_resnet50'] = {}
-	model_dict['main_2nd_cars_people_resnet50']['unmerged_acc'] = 0.97
+	model_dict[tasknames[0]] = {}
+	model_dict[tasknames[0]]['unmerged_acc'] = 0.97
 
 	# Initialize model structure and load weights
 	model_main_2nd = resnet50(2) # 2 classes
-	model_main_2nd.load_state_dict(torch.load('main_2nd_cars_people_resnet50_weights.pt'))
-	model_dict['main_2nd_cars_people_resnet50']['model'] = model_main_2nd
+	# model_main_2nd.load_state_dict(torch.load('tasknames[0]_weights.pt'))
+	model_dict[tasknames[0]]['model'] = model_main_2nd
 
-	model_dict['main_2nd_cars_people_resnet50']['task'] = 'image_classification'
-	model_dict['main_2nd_cars_people_resnet50']['eval_method'] = classification_eval
-	model_dict['main_2nd_cars_people_resnet50']['transforms'] = {'train': classification_transforms, 'val': classification_transforms}
+	model_dict[tasknames[0]]['task'] = 'image_classification'
+	model_dict[tasknames[0]]['eval_method'] = classification_eval
+	model_dict[tasknames[0]]['transforms'] = {'train': classification_transforms, 'val': classification_transforms}
 
 	# Task 2
-	model_dict['elm_1st_cars_trucks_motorcycles_resnet101'] = {}
-	model_dict['elm_1st_cars_trucks_motorcycles_resnet101']['unmerged_acc'] = 0.99
+	model_dict[tasknames[1]] = {}
+	model_dict[tasknames[1]]['unmerged_acc'] = 0.99
 
 	# Initialize model structure and load weights
 	model_elm_1st = resnet101(3) # 3 classes
-	model_elm_1st.load_state_dict(torch.load('elm_1st_cars_trucks_motorcycles_resnet101_weights.pt'))
-	model_dict['elm_1st_cars_trucks_motorcycles_resnet101']['model'] = model_elm_1st
+	# model_elm_1st.load_state_dict(torch.load('tasknames[1]_weights.pt'))
+	model_dict[tasknames[1]]['model'] = model_elm_1st
 
-	model_dict['elm_1st_cars_trucks_motorcycles_resnet101']['task'] = 'image_classification'
-	model_dict['elm_1st_cars_trucks_motorcycles_resnet101']['eval_method'] = classification_eval
-	model_dict['elm_1st_cars_trucks_motorcycles_resnet101']['transforms'] = {'train': classification_transforms, 'val': classification_transforms}
+	model_dict[tasknames[1]]['task'] = 'image_classification'
+	model_dict[tasknames[1]]['eval_method'] = classification_eval
+	model_dict[tasknames[1]]['transforms'] = {'train': classification_transforms, 'val': classification_transforms}
 
 	return model_dict
 
