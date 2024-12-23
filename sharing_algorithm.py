@@ -380,6 +380,8 @@ class Incremental_Greedy_Algorithm(Sharing_Algorithm):
 			
 
 	def next_group(self, config_index):
+		if config_index >= len(self.configs):
+			return config_index, []
 		layer = self.configs[config_index]['layer']
 		layer_indexes = self.configs[config_index]['indexes']
 		layer_group = []

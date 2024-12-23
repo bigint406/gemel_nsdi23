@@ -5,3 +5,5 @@ dataset_formation
 __pycache__
 results
 tensorboard
+logs
+.vscode
