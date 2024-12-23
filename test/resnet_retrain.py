@@ -32,8 +32,8 @@ train_dataset = datasets.ImageFolder(f'/mnt/data/zs/samba/gemel_nsdi23/dataset_f
 val_dataset = datasets.ImageFolder(f'/mnt/data/zs/samba/gemel_nsdi23/dataset_formation/datasets/{taskname}_CL/val/', transform=transform)
 
 # 定义 DataLoader
-batch_size = 1024
-train_loader = DataLoader(train_dataset, batch_size=batch_size, shuffle=False)
+batch_size = 1280
+train_loader = DataLoader(train_dataset, batch_size=batch_size, shuffle=True)
 val_loader = DataLoader(val_dataset, batch_size=batch_size, shuffle=False)
 
 # 加载预训练的ResNet-50模型
@@ -49,13 +49,13 @@ model.to(device)
 
 # 定义损失函数和优化器
 criterion = torch.nn.CrossEntropyLoss()
-optimizer = torch.optim.Adam(filter(lambda p: p.requires_grad, model.parameters()), lr=0.02)
+optimizer = torch.optim.Adam(filter(lambda p: p.requires_grad, model.parameters()), lr=0.01)
 
 losses = []
 accuracies = []
 
 # 训练模型
-num_epochs = 100
+num_epochs = 5
 for epoch in range(0, num_epochs):
     model.train()
     epoch_loss = 0.0
@@ -88,8 +88,8 @@ for epoch in range(0, num_epochs):
     avg_epoch_loss = epoch_loss / len(train_loader)
     losses.append(avg_epoch_loss)
 
-    if (epoch+1) % 10 == 0:
-        torch.save(model.state_dict(), f'test/models/{taskname}/resnet50_model_epoch_{epoch}.pth')
+    # if (epoch+1) % 10 == 0:
+    torch.save(model.state_dict(), f'test/models/{taskname}/resnet50_model_epoch_{epoch}.pth')
 
 # 绘制损失和准确率曲线
 fig, ax1 = plt.subplots(figsize=(12, 6))

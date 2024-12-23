@@ -97,7 +97,7 @@ class JointTrainer():
 		return val_batch_index
 
 
-	def train(self, models, train_dataloader, val_dataloaders, tasks, unmerged_accs, eval_methods, dataset_names, results_path, lr=0.00001, num_epochs=10):
+	def train(self, models, train_dataloader, val_dataloaders, tasks, unmerged_accs, eval_methods, dataset_names, results_path, lr=1e-4, num_epochs=5):
 		# Initialize dict to keep track of training
 		training_params = {'fraction_of_data': 1.0,
 					'indexes_models_met': [],
@@ -118,6 +118,7 @@ class JointTrainer():
 			model = model.to('cuda')
 			parameters_all.extend(list(model.parameters()))
 		optimizer = SGD(parameters_all, lr=lr, momentum=0.9, weight_decay=0.0005)
+		# optimizer = torch.optim.Adam(parameters_all, lr=lr)
 
 		# Start by calculating accuracy before doing any training
 		training_params = self.validate_and_update_params(models, val_dataloaders, tasks, eval_methods, training_params, 0.0, results_path, dataset_names)

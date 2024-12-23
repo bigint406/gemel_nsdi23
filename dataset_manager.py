@@ -67,7 +67,7 @@ class DatasetManager():
         
         train_loader = DataLoader(ConcatWithIndex([dataset['train'] for dataset in selected_datasets]), batch_size=train_batch_size,
                                                  shuffle=True, num_workers=0, collate_fn=self.train_collate)
-        val_loaders = [DataLoader(dataset['val'], batch_size=val_batch_size, shuffle=True, num_workers=0, collate_fn=self.val_collate)
+        val_loaders = [DataLoader(dataset['val'], batch_size=val_batch_size, shuffle=False, num_workers=0, collate_fn=self.val_collate)
                       for dataset in selected_datasets]
         
         return train_loader, val_loaders
@@ -171,7 +171,7 @@ class ImageClassificationDataset(datasets.ImageFolder):
         dataset_parts = model_name.split('_')
         dataset_parts[-1] = 'CL'
         dataset_name = '_'.join(dataset_parts)
-        dataset_path = os.path.join('..', 'dataset_formation', 'datasets', f'{dataset_name}')
+        dataset_path = os.path.join('dataset_formation', 'datasets', f'{dataset_name}')
         root_path = os.path.join(dataset_path, training_phase)
         super().__init__(root=root_path, transform=model_info['transforms'][training_phase])
 
