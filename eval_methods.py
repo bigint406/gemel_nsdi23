@@ -9,8 +9,8 @@ from coco_utils import get_coco_api_from_dataset
 from joint_trainer import move_to_gpu
 
 # sys.path.append("../dataset_formation/PyTorch-YOLOv3")
-from utils.utils import *
-from utils.datasets import *
+# from utils.utils import *
+# from utils.datasets import *
 
 def frcnn_eval(model, dataloader):
 	coco = get_coco_api_from_dataset(dataloader.dataset)
@@ -57,52 +57,52 @@ def frcnn_eval(model, dataloader):
 	return mean_s
 
 
-def yolo_eval(model, dataloader):
-	img_size = 416
-	labels = []
-	sample_metrics = []  # List of tuples (TP, confs, pred)
-	Tensor = torch.cuda.FloatTensor if torch.cuda.is_available() else torch.FloatTensor
-	index = 0
-	model = model.to('cuda')
-	for imgs, targets in dataloader:
-		imgs = torch.stack(imgs)
-		imgs = imgs.to('cuda')
+# def yolo_eval(model, dataloader):
+# 	img_size = 416
+# 	labels = []
+# 	sample_metrics = []  # List of tuples (TP, confs, pred)
+# 	Tensor = torch.cuda.FloatTensor if torch.cuda.is_available() else torch.FloatTensor
+# 	index = 0
+# 	model = model.to('cuda')
+# 	for imgs, targets in dataloader:
+# 		imgs = torch.stack(imgs)
+# 		imgs = imgs.to('cuda')
 
-		for i, boxes in enumerate(targets):
-			boxes[:, 0] = i
-		targets = torch.cat(targets, 0)
+# 		for i, boxes in enumerate(targets):
+# 			boxes[:, 0] = i
+# 		targets = torch.cat(targets, 0)
 
-		if targets is None:
-			print('continuing')
-			continue
+# 		if targets is None:
+# 			print('continuing')
+# 			continue
 			
-		# Extract labels
-		labels += targets[:, 1].tolist()
-		# Rescale target
-		targets[:, 2:] = xywh2xyxy(targets[:, 2:])
-		targets[:, 2:] *= img_size
+# 		# Extract labels
+# 		labels += targets[:, 1].tolist()
+# 		# Rescale target
+# 		targets[:, 2:] = xywh2xyxy(targets[:, 2:])
+# 		targets[:, 2:] *= img_size
 
-		imgs = Variable(imgs.type(Tensor), requires_grad=False)
+# 		imgs = Variable(imgs.type(Tensor), requires_grad=False)
 
-		with torch.no_grad():
-			outputs = model(imgs)
-			outputs = non_max_suppression(outputs, conf_thres=0.5, nms_thres=0.5)
-
-
-		sample_metrics += get_batch_statistics(outputs, targets, iou_threshold=0.5)
+# 		with torch.no_grad():
+# 			outputs = model(imgs)
+# 			outputs = non_max_suppression(outputs, conf_thres=0.5, nms_thres=0.5)
 
 
-		index += 1
+# 		sample_metrics += get_batch_statistics(outputs, targets, iou_threshold=0.5)
+
+
+# 		index += 1
 	
-	if len(sample_metrics) == 0:  # no detections over whole validation set.
-		print('no sample metrics')
-		return None
+# 	if len(sample_metrics) == 0:  # no detections over whole validation set.
+# 		print('no sample metrics')
+# 		return None
 	
-	# Concatenate sample statistics
-	true_positives, pred_scores, pred_labels = [np.concatenate(x, 0) for x in list(zip(*sample_metrics))]
-	precision, recall, AP, f1, ap_class = ap_per_class(true_positives, pred_scores, pred_labels, labels)
+# 	# Concatenate sample statistics
+# 	true_positives, pred_scores, pred_labels = [np.concatenate(x, 0) for x in list(zip(*sample_metrics))]
+# 	precision, recall, AP, f1, ap_class = ap_per_class(true_positives, pred_scores, pred_labels, labels)
 
-	return AP.mean()
+# 	return AP.mean()
 
 
 def classification_eval(model, dataloader):

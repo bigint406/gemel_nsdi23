@@ -93,12 +93,17 @@ class ModelMerger():
         total_mem, possible_mem = self.shared_layer_manager.total_possible_memory()
         print(f'Total memory before merging: {total_mem}, possible savings: {possible_mem}')
 
+        round = 0
         while True:
+            round += 1
+            print(f"_______________Round {round}_______________")
             prev_savings = actual_memory_savings
             prev_potential_savings = potential_mem_savings
             self.refresh_models()
             models, indexes_for_training, potential_mem_savings, layers_in_config = self.shared_layer_manager.update_merging(indexes_that_met)
             print(f'Right after refresh, indexes for training: {indexes_for_training}')
+            if (len(indexes_for_training) == 0):
+                break
 
             # Save stats from last run based on on which layers we successfully found weights for
             # layers in config includes only layers that are already successful, not the potential layer from the upcoming round
@@ -107,7 +112,7 @@ class ModelMerger():
                 json.dump(stats_dict, stats_file)
 
             # Concatenates all datasets and gets dataloaders for it
-            train_dataloader, val_dataloaders = self.dataset_manager.dataloaders(indexes_for_training)
+            train_dataloader, val_dataloaders = self.dataset_manager.dataloaders(indexes_for_training, 64, 64)
             training_models = [models[i] for i in indexes_for_training]
             training_tasks = [tasks[i] for i in indexes_for_training]
             training_unmerged_accs = [unmerged_accs[i] for i in indexes_for_training]
@@ -131,6 +136,13 @@ class ModelMerger():
                 indexes_that_met = indexes_over_time[-1][0]
             else:
                 indexes_that_met = []
+
+            p = f'results/round_{round}'
+            if not os.path.exists(p):
+                os.mkdir(p)
+            self.save_model_weights(p)
+
+            print("mem_savings_over_time")
             print(mem_savings_over_time)
 
 

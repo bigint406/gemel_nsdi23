@@ -1,0 +1,14 @@
+{
+    "models_path": {
+        "resnet101": {
+            "pytorch": "/home/zs/test/resnet101_model_epoch_14.pth"
+        },
+        "resnet50": {
+            "pytorch": "/home/zs/test/resnet50_model_epoch_4.pth"
+        }
+    },
+    "data_path": {
+        "val_car_truck_train": "/home/zs/test/val_elm_1st_car_truck_train.pth",
+        "val_cat_fish": "/home/zs/test/val_main_2nd_cat_fish.pth"
+    }
+}
