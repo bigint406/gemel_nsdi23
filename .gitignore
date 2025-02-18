@@ -7,3 +7,5 @@ results
 tensorboard
 logs
 .vscode
+*.png
+*.txt
