@@ -21,6 +21,10 @@ seed = 42
 torch.manual_seed(seed)
 torch.cuda.manual_seed(seed)
 torch.cuda.manual_seed_all(seed)
+
+with open('test/config.json', 'r') as f:
+    data = json.load(f)
+
 # Expects a dict containing each model to be merged and some info about it (see README and example below)
 def merge_workload(model_dict):
 	for key in model_dict.keys():
@@ -39,34 +43,34 @@ def merge_workload(model_dict):
 # One classifies cars vs. people at Main & 2nd with ResNet50
 # One classifies cars, trucks, and motorcycles at 1st & Elm with ResNet101
 def create_sample_model_dict():
-	tasknames = ['main_2nd_cat_fish_resnet50', 'elm_1st_car_truck_train_resnet101']
+	tasknames = ['elm_1st_car_truck_train_resnet101', 'main_2nd_cat_fish_resnet50']
 	model_dict = {}
 	
 	# Task 1
-	model_dict[tasknames[1]] = {}
-	model_dict[tasknames[1]]['unmerged_acc'] = 0.90
-
-	# Initialize model structure and load weights
-	model_elm_1st = resnet101(3) # 3 classes
-	model_elm_1st.load_state_dict(torch.load('/mnt/data/zs/samba/gemel_nsdi23/test/models/elm_1st_car_truck_train/resnet50_model_epoch_18.pth'))
-	model_dict[tasknames[1]]['model'] = model_elm_1st
-
-	model_dict[tasknames[1]]['task'] = 'image_classification'
-	model_dict[tasknames[1]]['eval_method'] = classification_eval
-	model_dict[tasknames[1]]['transforms'] = {'train': classification_transforms, 'val': classification_transforms}
-
-	# Task 2
 	model_dict[tasknames[0]] = {}
 	model_dict[tasknames[0]]['unmerged_acc'] = 0.90
 
 	# Initialize model structure and load weights
-	model_main_2nd = resnet50(2) # 2 classes
-	model_main_2nd.load_state_dict(torch.load('/mnt/data/zs/samba/gemel_nsdi23/test/models/main_2nd_cat_fish/resnet50_model_epoch_4.pth'))
-	model_dict[tasknames[0]]['model'] = model_main_2nd
+	model_elm_1st = resnet101(3) # 3 classes
+	model_elm_1st.load_state_dict(torch.load(data['models_path']['resnet101']['pytorch']))
+	model_dict[tasknames[0]]['model'] = model_elm_1st
 
 	model_dict[tasknames[0]]['task'] = 'image_classification'
 	model_dict[tasknames[0]]['eval_method'] = classification_eval
 	model_dict[tasknames[0]]['transforms'] = {'train': classification_transforms, 'val': classification_transforms}
+
+	# Task 2
+	model_dict[tasknames[1]] = {}
+	model_dict[tasknames[1]]['unmerged_acc'] = 0.90
+
+	# Initialize model structure and load weights
+	model_main_2nd = resnet50(2) # 2 classes
+	model_main_2nd.load_state_dict(torch.load(data['models_path']['resnet50']['pytorch']))
+	model_dict[tasknames[1]]['model'] = model_main_2nd
+
+	model_dict[tasknames[1]]['task'] = 'image_classification'
+	model_dict[tasknames[1]]['eval_method'] = classification_eval
+	model_dict[tasknames[1]]['transforms'] = {'train': classification_transforms, 'val': classification_transforms}
 
 	return model_dict
 

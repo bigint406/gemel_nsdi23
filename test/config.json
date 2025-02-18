@@ -1,0 +1,15 @@
+{
+    "models_path": {
+        "resnet101": {
+            "pytorch": "test/models/resnet101/elm_1st_car_truck_train/resnet50_model_epoch_14.pth",
+            "onnx": "test/models/resnet101/elm_1st_car_truck_train/epoch_14.onnx"
+        },
+        "resnet50": {
+            "pytorch": "test/models/resnet50/main_2nd_cat_fish_resnet50/resnet50_model_epoch_4.pth"
+        }
+    },
+    "data_path": {
+        "val_car_truck_train": "/mnt/data/zs/samba/gemel_nsdi23/test/val_elm_1st_car_truck_train.pth",
+        "val_cat_fish": "/mnt/data/zs/samba/gemel_nsdi23/test/val_main_2nd_cat_fish.pth"
+    }
+}

@@ -5,16 +5,18 @@ from torch.utils.data import DataLoader
 import matplotlib.pyplot as plt
 import os
 
-taskname = "main_2nd_cat_fish"
-if not os.path.exists(f'test/models/{taskname}'):
-    os.makedirs(f'test/models/{taskname}')
-if not os.path.exists(f'test/img'):
-    os.makedirs(f'test/img')
-if not os.path.exists(f'test/logs'):
-    os.makedirs(f'test/logs')
+taskname = "elm_1st_car_truck_train"
+modelname = "vgg_16"
+if not os.path.exists(f'test/models/{modelname}/{taskname}'):
+    os.makedirs(f'test/models/{modelname}/{taskname}')
+if not os.path.exists(f'test/img/{modelname}'):
+    os.makedirs(f'test/img/{modelname}')
+if not os.path.exists(f'test/logs/{modelname}'):
+    os.makedirs(f'test/logs/{modelname}')
 
 # 设置随机种子
 seed = 42
+torch.cuda.set_device(1)
 torch.manual_seed(seed)
 torch.cuda.manual_seed(seed)
 torch.cuda.manual_seed_all(seed)  # 如果使用多GPU
@@ -32,18 +34,18 @@ train_dataset = datasets.ImageFolder(f'/mnt/data/zs/samba/gemel_nsdi23/dataset_f
 val_dataset = datasets.ImageFolder(f'/mnt/data/zs/samba/gemel_nsdi23/dataset_formation/datasets/{taskname}_CL/val/', transform=transform)
 
 # 定义 DataLoader
-batch_size = 1280
+batch_size = 512
 train_loader = DataLoader(train_dataset, batch_size=batch_size, shuffle=True)
 val_loader = DataLoader(val_dataset, batch_size=batch_size, shuffle=False)
 
 # 加载预训练的ResNet-50模型
-torch.cuda.set_device(1)
-model = resnet50(2)
+model = vgg16(3)
 # model.load_state_dict(torch.load("/mnt/data/zs/samba/gemel_nsdi23/test/models/main_2nd_cat_fish/resnet50_model_epoch_9.pth"))
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 for param in model.parameters():
     param.requires_grad = False
-for param in model.fc.parameters():
+for param in model.classifier.parameters():
+# for param in model.fc.parameters():
     param.requires_grad = True
 model.to(device)
 
@@ -89,7 +91,7 @@ for epoch in range(0, num_epochs):
     losses.append(avg_epoch_loss)
 
     # if (epoch+1) % 10 == 0:
-    torch.save(model.state_dict(), f'test/models/{taskname}/resnet50_model_epoch_{epoch}.pth')
+    torch.save(model.state_dict(), f'test/models/{modelname}/{taskname}/epoch_{epoch}.pth')
 
 # 绘制损失和准确率曲线
 fig, ax1 = plt.subplots(figsize=(12, 6))
@@ -108,9 +110,9 @@ ax2.tick_params(axis='y', labelcolor=color)
 
 fig.tight_layout()
 plt.title('Training Loss and Validation Accuracy')
-plt.savefig(f'test/img/{taskname}.png')
+plt.savefig(f'test/img/{modelname}/{taskname}.png')
 
-with open(f"test/logs/{taskname}.log", 'w') as f:
+with open(f"test/logs/{modelname}/{taskname}.log", 'w') as f:
     f.write(str(losses))
     f.write("\n")
     f.write(str(accuracies))
