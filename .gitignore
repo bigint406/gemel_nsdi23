@@ -9,3 +9,5 @@ logs
 .vscode
 *.png
 *.txt
+*.log
+*.pth
